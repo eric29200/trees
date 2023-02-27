@@ -5,6 +5,7 @@
 
 #define NODE_SIZE_X			20
 #define NODE_SIZE_Y			20
+#define NODE_FONT			"Arial"
 #define MAX_NODE_VALUE			99
 #define TREE_TYPE			TREE_TYPE_AVL
 
@@ -45,7 +46,7 @@ static void draw_node_value(struct node_t *node, cairo_t *cr, gint x, gint y)
 
 	/* draw value */
 	len = sprintf(val_string, "%d", node->val);
-	cairo_select_font_face(cr, "Purisa", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+	cairo_select_font_face(cr, NODE_FONT, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
 	cairo_set_font_size(cr, 12);
 	cairo_move_to(cr, len == 1 ? x + 6 : x + 3, y + 15);
 	cairo_show_text(cr, val_string);
@@ -322,7 +323,7 @@ static void clear_tree_cb(GtkWidget *widget, struct tree_window_t *tree_window)
 /*
  * Create tree window.
  */
-static struct tree_window_t *tree_window_create(GtkApplication *app)
+static struct tree_window_t *tree_window_create()
 {
 	struct tree_window_t *tree_window;
 
@@ -336,7 +337,7 @@ static struct tree_window_t *tree_window_create(GtkApplication *app)
 	tree_window->tree = NULL;
 
 	/* create main window */
-	tree_window->window = gtk_application_window_new(app);
+	tree_window->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(tree_window->window), "Tree");
 	gtk_container_set_border_width(GTK_CONTAINER(tree_window->window), 8);
 	g_signal_connect(G_OBJECT(tree_window->window), "destroy", G_CALLBACK(exit_cb), tree_window);
@@ -396,39 +397,26 @@ static struct tree_window_t *tree_window_create(GtkApplication *app)
 }
 
 /*
- * Activate application.
+ * Main.
  */
-static void activate_cb(GtkApplication *app)
+int main(int argc, char **argv)
 {
 	struct tree_window_t *tree_window;
+
+	/* init gtk */
+	gtk_init(&argc, &argv);
 
 	/* seed */
 	srand(time(NULL));
 
 	/* create tree window */
-	tree_window = tree_window_create(app);
+	tree_window = tree_window_create();
+	if (!tree_window)
+		return EXIT_FAILURE;
 
 	/* show main window */
 	gtk_widget_show_all(tree_window->window);
-}
+	gtk_main();
 
-/*
- * Main.
- */
-int main(int argc, char **argv)
-{
-	GtkApplication *app;
-	int status;
-
-	/* create new application */
-	app = gtk_application_new("org.gtk.example", 0);
-	g_signal_connect(app, "activate", G_CALLBACK(activate_cb), NULL);
-
-	/* run application */
-	status = g_application_run(G_APPLICATION(app), argc, argv);
-
-	/* unref application */
-	g_object_unref(app);
-
-	return status;
+	return 0;
 }
