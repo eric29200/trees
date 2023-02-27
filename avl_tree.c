@@ -252,6 +252,7 @@ static void tree_balance(struct tree_t *tree)
  */
 struct tree_operations_t avl_tree_ops = {
 	.height			= generic_tree_height,
+	.find			= generic_tree_find,
 	.insert			= tree_insert,
 	.delete			= tree_delete,
 	.balance		= tree_balance,

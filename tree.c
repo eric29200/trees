@@ -43,6 +43,22 @@ static int node_height(struct node_t *node)
 }
 
 /*
+ * Find a node.
+ */
+static struct node_t *node_find(struct node_t *node, int val)
+{
+	if (!node)
+		return NULL;
+
+	if (val < node->val)
+		return node_find(node->left, val);
+	else if (val > node->val)
+		return node_find(node->right, val);
+
+	return node;
+}
+
+/*
  * Free a node.
  */
 void node_free(struct node_t *node)
@@ -79,6 +95,17 @@ int generic_tree_height(struct tree_t *tree)
 		return 0;
 
 	return node_height(tree->root);
+}
+
+/*
+ * Find a node in a tree.
+ */
+struct node_t *generic_tree_find(struct tree_t *tree, int val)
+{
+	if (!tree)
+		return NULL;
+
+	return node_find(tree->root, val);
 }
 
 /*
