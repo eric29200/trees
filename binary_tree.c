@@ -84,17 +84,9 @@ static struct node_t *node_delete(struct tree_t *tree, struct node_t *node, int 
 
 	/* this node must be deleted */
 
-	/* no left child : replace this node whit right child */
-	if (!node->left) {
-		tmp = node->right;
-		free(node);
-		tree->size--;
-		return tmp;
-	}
-
-	/* no right child : replace this node whit left child */
-	if (!node->right) {
-		tmp = node->left;
+	/* only one child or no child : replace this node with this child */
+	if (!node->left || !node->right) {
+		tmp = node->left ? node->left : node->right;
 		free(node);
 		tree->size--;
 		return tmp;
