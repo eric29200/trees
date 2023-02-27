@@ -23,24 +23,6 @@ static void node_traverse_in_order(struct node_t *node, struct node_t **nodes, i
 }
 
 /*
- * Compute a node height.
- */
-static int node_height(struct node_t *node)
-{
-	int height_l, height_r;
-
-	if (!node)
-		return 0;
-
-	/* compute left/right heights */
-	height_l = 1 + node_height(node->left);
-	height_r = 1 + node_height(node->right);
-
-	/* return max left/right height */
-	return height_l >= height_r ? height_l : height_r;
-}
-
-/*
  * Insert a value in a node.
  */
 static struct node_t *node_insert(struct tree_t *tree, struct node_t *node, int val)
@@ -54,6 +36,7 @@ static struct node_t *node_insert(struct tree_t *tree, struct node_t *node, int 
 
 		/* update tree size */
 		tree->size++;
+		goto out;
 	}
 
 	/* find subtree */
@@ -99,7 +82,7 @@ static struct node_t *node_delete(struct tree_t *tree, struct node_t *node, int 
 		return node;
 	}
 
-	/* this node must be free */
+	/* this node must be deleted */
 
 	/* no left child : replace this node whit right child */
 	if (!node->left) {
@@ -152,17 +135,6 @@ static struct node_t *node_make_balanced(struct tree_t *tree, struct node_t **no
 	root->right = node_make_balanced(tree, nodes, mid + 1, end);
 
 	return root;
-}
-
-/*
- * Compute a tree height.
- */
-static int tree_height(struct tree_t *tree)
-{
-	if (!tree)
-		return 0;
-
-	return node_height(tree->root);
 }
 
 /*
@@ -219,24 +191,12 @@ static void tree_balance(struct tree_t *tree)
 }
 
 /*
- * Free a tree.
- */
-static void tree_free(struct tree_t *tree)
-{
-	if (!tree)
-		return;
-
-	node_free(tree->root);
-	free(tree);
-}
-
-/*
  * Binary tree operations.
  */
 struct tree_operations_t binary_tree_ops = {
-	.height			= tree_height,
+	.height			= generic_tree_height,
 	.insert			= tree_insert,
 	.delete			= tree_delete,
 	.balance		= tree_balance,
-	.free			= tree_free,
+	.free			= generic_tree_free,
 };

@@ -17,10 +17,29 @@ struct node_t *node_create(int val)
 
 	/* set node */
 	node->val = val;
+	node->height = 1;
 	node->left = NULL;
 	node->right = NULL;
 
 	return node;
+}
+
+/*
+ * Compute a node height.
+ */
+static int node_height(struct node_t *node)
+{
+	int height_l, height_r;
+
+	if (!node)
+		return 0;
+
+	/* compute left/right heights */
+	height_l = 1 + node_height(node->left);
+	height_r = 1 + node_height(node->right);
+
+	/* return max left/right height */
+	return max(height_l, height_r);
 }
 
 /*
@@ -37,6 +56,29 @@ void node_free(struct node_t *node)
 
 	/* free node */
 	free(node);
+}
+
+/*
+ * Free a tree.
+ */
+void generic_tree_free(struct tree_t *tree)
+{
+	if (!tree)
+		return;
+
+	node_free(tree->root);
+	free(tree);
+}
+
+/*
+ * Compute a tree height.
+ */
+int generic_tree_height(struct tree_t *tree)
+{
+	if (!tree)
+		return 0;
+
+	return node_height(tree->root);
 }
 
 /*
@@ -58,6 +100,9 @@ struct tree_t *tree_create(int type)
 	switch (type) {
 		case TREE_TYPE_BINARY:
 			tree->ops = &binary_tree_ops;
+			break;
+		case TREE_TYPE_AVL:
+			tree->ops = &avl_tree_ops;
 			break;
 		default:
 			fprintf(stderr, "unknown tree type %d\n", type);

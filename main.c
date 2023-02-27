@@ -6,7 +6,7 @@
 #define NODE_SIZE_X			20
 #define NODE_SIZE_Y			20
 #define MAX_NODE_VALUE			99
-#define TREE_TYPE			TREE_TYPE_BINARY
+#define TREE_TYPE			TREE_TYPE_AVL
 
 /*
  * Tree window.
@@ -210,6 +210,10 @@ static void add_cb(GtkWidget *widget, struct tree_window_t *tree_window)
 	if (!tree)
 		tree_window->tree = tree = tree_create(TREE_TYPE);
 
+	/* insert not implemented */
+	if (!tree || !tree->ops || !tree->ops->insert)
+		return;
+
 	/* insert value */
 	val = (int) gtk_spin_button_get_value(GTK_SPIN_BUTTON(tree_window->entry_spin_add));
 	tree->ops->insert(tree, val);
@@ -229,8 +233,8 @@ static void delete_cb(GtkWidget *widget, struct tree_window_t *tree_window)
 
 	g_assert(widget != NULL);
 
-	/* no tree */
-	if (!tree)
+	/* delete not implemented */
+	if (!tree || !tree->ops || !tree->ops->delete)
 		return;
 
 	/* delete a value */
@@ -255,6 +259,10 @@ static void add_random_cb(GtkWidget *widget, struct tree_window_t *tree_window)
 	if (!tree)
 		tree_window->tree = tree = tree_create(TREE_TYPE);
 
+	/* insert not implemented */
+	if (!tree || !tree->ops || !tree->ops->insert)
+		return;
+
 	/* insert a random value */
 	tree->ops->insert(tree, rand() % MAX_NODE_VALUE);
 
@@ -271,10 +279,13 @@ static void balance_tree_cb(GtkWidget *widget, struct tree_window_t *tree_window
 	struct tree_t *tree = tree_window->tree;
 
 	g_assert(widget != NULL);
+	
+	/* balance not implemented */
+	if (!tree || !tree->ops || !tree->ops->balance)
+		return;
 
 	/* balance tree */
-	if (tree)
-		tree->ops->balance(tree);
+	tree->ops->balance(tree);
 
 	/* draw tree */	
 	draw_tree(tree_window);
@@ -291,9 +302,12 @@ static void clear_tree_cb(GtkWidget *widget, struct tree_window_t *tree_window)
 
 	g_assert(widget != NULL);
 
+	/* free not implemented */
+	if (!tree || !tree->ops || !tree->ops->free)
+		return;
+
 	/* free tree */
-	if (tree)
-		tree->ops->free(tree);
+	tree->ops->free(tree);
 	tree_window->tree = NULL;
 
 	/* clear surface */

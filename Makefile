@@ -4,7 +4,7 @@ CC      := gcc
 
 all: main
 
-main: tree.o binary_tree.o main.o
+main: tree.o binary_tree.o avl_tree.o main.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 .o: .c
