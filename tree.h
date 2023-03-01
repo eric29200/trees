@@ -30,7 +30,7 @@ struct tree_t {
  */
 struct tree_operations_t {
 	int				(*height)(struct tree_t *);
-	struct node_t *			(*find)(struct tree_t *, int);
+	int				(*find)(struct tree_t *, int);
 	void	 			(*insert)(struct tree_t *, int);
 	void 				(*delete)(struct tree_t *, int);
 	void 				(*balance)(struct tree_t *);
@@ -49,7 +49,7 @@ void node_free(struct node_t *node);
 struct tree_t *tree_create(int type);
 void generic_tree_free(struct tree_t *tree);
 int generic_tree_height(struct tree_t *tree);
-struct node_t *generic_tree_find(struct tree_t *tree, int val);
+int generic_tree_find(struct tree_t *tree, int val);
 
 /*
  * Utility function to compute maximum int.

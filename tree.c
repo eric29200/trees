@@ -100,12 +100,12 @@ int generic_tree_height(struct tree_t *tree)
 /*
  * Find a node in a tree.
  */
-struct node_t *generic_tree_find(struct tree_t *tree, int val)
+int generic_tree_find(struct tree_t *tree, int val)
 {
 	if (!tree)
-		return NULL;
+		return 0;
 
-	return node_find(tree->root, val);
+	return node_find(tree->root, val) != NULL;
 }
 
 /*
