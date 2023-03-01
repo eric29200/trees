@@ -3,9 +3,6 @@
 
 #include "tree.h"
 
-#define NODE_SIZE_X			20
-#define NODE_SIZE_Y			20
-#define NODE_FONT			"Arial"
 #define MAX_NODE_VALUE			99
 #define TREE_TYPE			TREE_TYPE_AVL
 
@@ -31,81 +28,12 @@ struct tree_window_t {
 };
 
 /*
- * Draw a node value.
- */
-static void draw_node_value(struct node_t *node, cairo_t *cr, gint x, gint y)
-{
-	char val_string[64];
-	int len;
-
-	/* draw rectangle node */
-	cairo_set_line_width(cr, 2.0);
-	cairo_set_source_rgb(cr, 0, 0, 0);
-	cairo_rectangle(cr, x, y, NODE_SIZE_X, NODE_SIZE_Y);
-	cairo_stroke(cr);
-
-	/* draw value */
-	len = sprintf(val_string, "%d", node->val);
-	cairo_select_font_face(cr, NODE_FONT, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-	cairo_set_font_size(cr, 12);
-	cairo_move_to(cr, len == 1 ? x + 6 : x + 3, y + 15);
-	cairo_show_text(cr, val_string);
-}
-
-/*
- * Draw a node.
- */
-static void draw_node(struct node_t *node, cairo_t *cr, gint x, gint y, gint space_sibling)
-{
-	gint x_child, y_child;
-
-	if (!node)
-		return;
-
-	/* draw value */
-	draw_node_value(node, cr, x, y);
-
-	/* draw left child */
-	if (node->left) {
-		/* compute x/y child */
-		x_child = x - NODE_SIZE_X * space_sibling;
-		y_child = y + NODE_SIZE_Y * 2;
-
-		/* draw left arrow */
-		cairo_move_to(cr, x + NODE_SIZE_X / 2, y + NODE_SIZE_Y);
-		cairo_line_to(cr, x_child + NODE_SIZE_X / 2, y_child);
-		cairo_stroke(cr);
-
-		/* draw left node */
-		draw_node(node->left, cr, x_child, y_child, space_sibling / 2);
-	}
-
-	/* draw right child */
-	if (node->right) {
-		/* compute x/y child */
-		x_child = x + NODE_SIZE_X * space_sibling;
-		y_child = y + NODE_SIZE_Y * 2;
-
-		/* draw right arrow */
-		cairo_move_to(cr, x + NODE_SIZE_X / 2, y + NODE_SIZE_Y);
-		cairo_line_to(cr, x_child + NODE_SIZE_X / 2, y_child);
-		cairo_stroke(cr);
-
-		/* draw right node */
-		draw_node(node->right, cr, x_child, y_child, space_sibling / 2);
-	}
-}
-
-/*
  * Draw a tree.
  */
-static void draw_tree(struct tree_window_t *tree_window)
+static void tree_draw(struct tree_window_t *tree_window)
 {
 	struct tree_t *tree = tree_window->tree;
-	GtkAllocation *alloc;
-	int space_sibling;
 	cairo_t *cr;
-	gint x, y;
 
 	/* destroy surface */
 	if (tree_window->drawing_surface)
@@ -116,32 +44,16 @@ static void draw_tree(struct tree_window_t *tree_window)
 			CAIRO_CONTENT_COLOR,
 			gtk_widget_get_allocated_width(tree_window->drawing_area),
 			gtk_widget_get_allocated_height(tree_window->drawing_area));
-
+	
 	/* create empty surface */
 	cr = cairo_create(tree_window->drawing_surface);
 	cairo_set_source_rgb(cr, 1, 1, 1);
 	cairo_paint(cr);
 
 	/* draw tree */
-	if (tree) {
-		/* compute space between sibling */
-		space_sibling = pow(2, tree->ops->height(tree) - 1) / 2;
-
-		/* get drawing area size */
-		alloc = g_new(GtkAllocation, 1);
-		gtk_widget_get_allocation(tree_window->drawing_area, alloc);
-
-		/* start at middle x */
-		x = alloc->width / 2;
-		y = 100;
-
-		/* free drawing area size */
-		g_free(alloc);
-
-		/* draw root node */
-		draw_node(tree->root, cr, x, y, space_sibling);
-	}
-
+	if (tree && tree->ops && tree->ops->draw)
+		tree->ops->draw(tree, tree_window->drawing_area, cr);
+	
 	/* destroy cairo */
 	cairo_destroy(cr);
 }
@@ -192,7 +104,7 @@ static gboolean configure_event_cb(GtkWidget *widget, GdkEvent *event, struct tr
 	g_assert(event != NULL);
 
 	/* draw tree */
-	draw_tree(tree_window);
+	tree_draw(tree_window);
 
 	return TRUE;
 }
@@ -220,7 +132,7 @@ static void add_cb(GtkWidget *widget, struct tree_window_t *tree_window)
 	tree->ops->insert(tree, val);
 
 	/* draw tree */	
-	draw_tree(tree_window);
+	tree_draw(tree_window);
 	gtk_widget_queue_draw(tree_window->drawing_area);
 }
 
@@ -243,7 +155,7 @@ static void delete_cb(GtkWidget *widget, struct tree_window_t *tree_window)
 	tree->ops->delete(tree, val);
 
 	/* draw tree */	
-	draw_tree(tree_window);
+	tree_draw(tree_window);
 	gtk_widget_queue_draw(tree_window->drawing_area);
 }
 
@@ -268,7 +180,7 @@ static void add_random_cb(GtkWidget *widget, struct tree_window_t *tree_window)
 	tree->ops->insert(tree, rand() % MAX_NODE_VALUE);
 
 	/* draw tree */	
-	draw_tree(tree_window);
+	tree_draw(tree_window);
 	gtk_widget_queue_draw(tree_window->drawing_area);
 }
 
@@ -289,7 +201,7 @@ static void balance_tree_cb(GtkWidget *widget, struct tree_window_t *tree_window
 	tree->ops->balance(tree);
 
 	/* draw tree */	
-	draw_tree(tree_window);
+	tree_draw(tree_window);
 	gtk_widget_queue_draw(tree_window->drawing_area);
 }
 
